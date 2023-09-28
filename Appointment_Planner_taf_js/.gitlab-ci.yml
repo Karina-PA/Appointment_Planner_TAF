@@ -1,0 +1,66 @@
+variables:
+  CI: 'true'
+
+stages: # List of stages for jobs, and their order of execution
+  - lint
+  - test
+
+image: circleci/node:lts-browsers
+
+lint-test-job:
+  stage: lint
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - npm install
+    - npm run lint
+
+test-firefox:
+  stage: test
+  services:
+    - name: selenium/standalone-firefox
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  before_script:
+    - npm install
+  script:
+    - npm run test:firefox:5555
+
+test-chrome:
+  stage: test
+  services:
+    - name: selenium/standalone-chrome
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  before_script:
+    - npm install
+  script:
+    - npm run test:chrome:5555
+# test:firefox: # This job runs in the test stage.
+#   stage: test # It only starts when the job in the build stage completes successfully.
+#   services:
+#     - selenium/standalone-firefox
+#   rules:
+#     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+#   before_script:
+#     - apt-get update
+#     - apt-get install -y openjdk-17-jre-headless
+#   script:
+#     - npm run start
+#     - npm install
+#     - java -version
+#     - npm run test:firefox
+
+# test:msedge: # This job runs in the test stage.
+#   stage: test # It only starts when the job in the build stage completes successfully.
+#   services:
+#     - selenium/standalone-edge
+#   rules:
+#     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+#   before_script:
+
+#   script:
+#     - npm install
+#     - java -version
+#     - npm run test:msedge
+
